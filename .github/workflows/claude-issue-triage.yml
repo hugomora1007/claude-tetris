@@ -43,7 +43,7 @@ jobs:
             5. Publica o actualiza UN único comentario de diagnóstico que empiece con la línea `<!-- claude-triage -->`.
                - Si ya existe un comentario con esa línea (`gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments`), actualízalo con `gh api -X PATCH` en lugar de crear otro.
                - Si no existe, créalo con `gh issue comment ${{ github.event.issue.number }} --body-file <archivo>`.
-               El diagnóstico debe estar en español e incluir:
+               El diagnóstico debe estar en español, escrito en Markdown que GitHub renderice correctamente (encabezados, listas, bloques de código con el lenguaje indicado y enlaces), e incluir:
                - **Resumen:** qué reporta o pide el issue.
                - **Tipo y severidad:** clasificación y justificación breve.
                - **Causa probable o área afectada:** archivos, funciones y líneas (`archivo:línea`) implicados.
