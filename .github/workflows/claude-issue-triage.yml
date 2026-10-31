@@ -1,0 +1,59 @@
+name: Claude Issue Triage
+
+on:
+  issues:
+    types: [opened, edited]
+
+concurrency:
+  group: issue-triage-${{ github.event.issue.number }}
+  cancel-in-progress: true
+
+jobs:
+  triage:
+    # Ignora issues creados o editados por bots para evitar bucles.
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      issues: write
+      id-token: write
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 1
+
+      - name: Triage issue with Claude
+        uses: anthropics/claude-code-action@v1
+        env:
+          GH_TOKEN: ${{ github.token }}
+          ISSUE_NUMBER: ${{ github.event.issue.number }}
+        with:
+          claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
+          prompt: |
+            Eres el encargado de triage de issues del juego Tetris de este repositorio.
+            Analiza el issue #${{ github.event.issue.number }} y sigue estos pasos en orden.
+
+            1. Lee el issue con `gh issue view ${{ github.event.issue.number }} --json title,body,labels,comments`.
+            2. Lista las labels existentes con `gh label list`. Usa SOLO labels que ya existan; no crees labels nuevas.
+            3. Asigna las labels que correspondan con `gh issue edit ${{ github.event.issue.number }} --add-label "<label1>,<label2>"`.
+               Clasifica por tipo (bug, enhancement, question, documentation u otra existente) y, si existen, por prioridad o área.
+               Quita labels de triage anteriores que ya no apliquen con `--remove-label`.
+            4. Revisa el código relevante (`index.html`, `game.js`, `style.css`) para ubicar el área afectada.
+            5. Publica o actualiza UN único comentario de diagnóstico que empiece con la línea `<!-- claude-triage -->`.
+               - Si ya existe un comentario con esa línea (`gh api repos/${{ github.repository }}/issues/${{ github.event.issue.number }}/comments`), actualízalo con `gh api -X PATCH` en lugar de crear otro.
+               - Si no existe, créalo con `gh issue comment ${{ github.event.issue.number }} --body-file <archivo>`.
+               El diagnóstico debe estar en español e incluir:
+               - **Resumen:** qué reporta o pide el issue.
+               - **Tipo y severidad:** clasificación y justificación breve.
+               - **Causa probable o área afectada:** archivos, funciones y líneas (`archivo:línea`) implicados.
+               - **Pasos para reproducir:** si es un bug y hay información suficiente.
+               - **Enfoque de solución propuesto:** cambios sugeridos a alto nivel, sin implementarlos.
+               - **Criterios de aceptación:** lista verificable.
+               - **Información pendiente:** preguntas abiertas si falta contexto.
+
+            Reglas:
+            - No modifiques archivos del repositorio, no hagas commits y no abras PRs.
+            - Sé concreto y basa el diagnóstico en el código real; indica claramente lo que sea una suposición.
+          claude_args: |
+            --allowed-tools "Bash(gh issue view:*),Bash(gh issue edit:*),Bash(gh issue comment:*),Bash(gh label list:*),Bash(gh api:*),Bash(cat:*),Read,Grep,Glob"
