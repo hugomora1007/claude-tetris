@@ -39,7 +39,9 @@ const overlay = document.getElementById('overlay');
 const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
+const themeBtn = document.getElementById('theme-toggle');
 
+let gridColor = '#22222e';
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
 
 function createBoard() {
@@ -168,8 +170,19 @@ function drawBlock(context, x, y, colorIndex, size, alpha) {
   context.globalAlpha = 1;
 }
 
+function applyTheme(theme, persist) {
+  document.documentElement.dataset.theme = theme;
+  themeBtn.setAttribute('aria-checked', String(theme === 'light'));
+  gridColor = getComputedStyle(document.documentElement).getPropertyValue('--grid').trim() || gridColor;
+  if (persist) {
+    try { localStorage.setItem('theme', theme); } catch (e) { /* ignore */ }
+  }
+  // Redraw so paused / game over states update immediately
+  if (current) { draw(); drawNext(); }
+}
+
 function drawGrid() {
-  ctx.strokeStyle = '#22222e';
+  ctx.strokeStyle = gridColor;
   ctx.lineWidth = 0.5;
   for (let c = 1; c < COLS; c++) {
     ctx.beginPath();
@@ -275,6 +288,8 @@ function init() {
 }
 
 document.addEventListener('keydown', e => {
+  // Keys on the theme switch must not move pieces (Space would hard drop)
+  if (e.target === themeBtn) return;
   if (e.code === 'KeyP') { togglePause(); return; }
   if (paused || gameOver) return;
   switch (e.code) {
@@ -300,5 +315,12 @@ document.addEventListener('keydown', e => {
 });
 
 restartBtn.addEventListener('click', init);
+themeBtn.addEventListener('click', () => {
+  const isLight = document.documentElement.dataset.theme === 'light';
+  applyTheme(isLight ? 'dark' : 'light', true);
+  themeBtn.blur();
+});
+
+applyTheme(document.documentElement.dataset.theme || 'dark', false);
 
 init();
