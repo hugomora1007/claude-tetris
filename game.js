@@ -40,9 +40,21 @@ const overlayTitle = document.getElementById('overlay-title');
 const overlayScore = document.getElementById('overlay-score');
 const restartBtn = document.getElementById('restart-btn');
 const themeBtn = document.getElementById('theme-toggle');
+const pauseMenu = document.getElementById('pause-menu');
+const resumeBtn = document.getElementById('resume-btn');
+const menuRestartBtn = document.getElementById('menu-restart-btn');
+const controlsBtn = document.getElementById('controls-btn');
+const controlsList = document.getElementById('menu-controls');
+const startLevelSelect = document.getElementById('start-level');
 
 let gridColor = '#22222e';
+let startLevel = 1;
+let menuReturnFocus = null;
 let board, current, next, score, lines, level, paused, gameOver, lastTime, dropAccum, dropInterval, animId;
+
+function intervalFor(lvl) {
+  return Math.max(100, 1000 - (lvl - 1) * 90);
+}
 
 function createBoard() {
   return Array.from({ length: ROWS }, () => new Array(COLS).fill(0));
@@ -108,8 +120,8 @@ function clearLines() {
   if (cleared) {
     lines += cleared;
     score += (LINE_SCORES[cleared] || 0) * level;
-    level = Math.floor(lines / 10) + 1;
-    dropInterval = Math.max(100, 1000 - (level - 1) * 90);
+    level = startLevel + Math.floor(lines / 10);
+    dropInterval = intervalFor(level);
     updateHUD();
   }
 }
@@ -242,17 +254,38 @@ function endGame() {
   overlay.classList.remove('hidden');
 }
 
+function showPauseMenu() {
+  menuReturnFocus = document.activeElement;
+  pauseMenu.classList.remove('hidden');
+  resumeBtn.focus();
+}
+
+function hidePauseMenu() {
+  if (pauseMenu.classList.contains('hidden')) return;
+  pauseMenu.classList.add('hidden');
+  controlsList.hidden = true;
+  controlsBtn.setAttribute('aria-expanded', 'false');
+  // Give focus back to where it was; otherwise drop it so keys reach the game
+  if (menuReturnFocus && menuReturnFocus !== document.body && menuReturnFocus.offsetParent !== null) {
+    menuReturnFocus.focus();
+  } else if (document.activeElement && document.activeElement.blur) {
+    document.activeElement.blur();
+  }
+  menuReturnFocus = null;
+}
+
 function togglePause() {
   if (gameOver) return;
   paused = !paused;
   if (!paused) {
+    hidePauseMenu();
+    dropAccum = 0;
     lastTime = performance.now();
+    cancelAnimationFrame(animId);
     loop(lastTime);
   } else {
     cancelAnimationFrame(animId);
-    overlayTitle.textContent = 'PAUSA';
-    overlayScore.textContent = '';
-    overlay.classList.remove('hidden');
+    showPauseMenu();
   }
 }
 
@@ -277,16 +310,17 @@ function init() {
   board = createBoard();
   score = 0;
   lines = 0;
-  level = 1;
+  level = startLevel;
   paused = false;
   gameOver = false;
-  dropInterval = 1000;
+  dropInterval = intervalFor(level);
   dropAccum = 0;
   lastTime = performance.now();
   next = randomPiece();
   spawn();
   updateHUD();
   overlay.classList.add('hidden');
+  hidePauseMenu();
   cancelAnimationFrame(animId);
   animId = requestAnimationFrame(loop);
 }
@@ -294,7 +328,10 @@ function init() {
 document.addEventListener('keydown', e => {
   // Keys on the theme switch must not move pieces (Space would hard drop)
   if (e.target === themeBtn) return;
-  if (e.code === 'KeyP') { togglePause(); return; }
+  // Esc closes the native level dropdown; don't resume then
+  if (e.target === startLevelSelect && e.code === 'Escape') return;
+  if (e.code === 'KeyP' || e.code === 'Escape') { togglePause(); return; }
+  // While the pause menu is open, keys only act on its own controls
   if (paused || gameOver) return;
   switch (e.code) {
     case 'ArrowLeft':
@@ -319,6 +356,15 @@ document.addEventListener('keydown', e => {
 });
 
 restartBtn.addEventListener('click', init);
+resumeBtn.addEventListener('click', togglePause);
+menuRestartBtn.addEventListener('click', init);
+controlsBtn.addEventListener('click', () => {
+  controlsList.hidden = !controlsList.hidden;
+  controlsBtn.setAttribute('aria-expanded', String(!controlsList.hidden));
+});
+startLevelSelect.addEventListener('change', () => {
+  startLevel = Number(startLevelSelect.value) || 1;
+});
 themeBtn.addEventListener('click', () => {
   const isLight = document.documentElement.dataset.theme === 'light';
   applyTheme(isLight ? 'dark' : 'light', true);
