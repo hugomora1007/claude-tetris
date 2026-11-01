@@ -17,6 +17,7 @@ Implementación del clásico **Tetris** en JavaScript vanilla, usando HTML5 Canv
     - [Opción 1: abrir el archivo directamente](#opción-1-abrir-el-archivo-directamente)
     - [Opción 2: servidor local (recomendado)](#opción-2-servidor-local-recomendado)
   - [Controles](#controles)
+  - [Records](#records)
   - [Cómo funciona](#cómo-funciona)
     - [1. `index.html`](#1-indexhtml)
     - [2. `style.css`](#2-stylecss)
@@ -42,6 +43,7 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Sistema de puntuación** clásico de Tetris (100 / 300 / 500 / 800 multiplicado por nivel).
 - **Niveles** que aumentan cada 10 líneas y aceleran la caída.
 - **Pausa** y **Game Over** con opción de reinicio.
+- **Tabla de records local**: top 5 con nombre del jugador, mejor combo y máximo de líneas en una partida, guardados en `localStorage` (clave `tetris-records`). Se muestra en la pantalla de inicio y al terminar la partida, y se puede borrar con el botón «Borrar records».
 - **Modo claro / oscuro**: un switch junto al título alterna el tema. Al primer uso se respeta `prefers-color-scheme` del sistema y la elección se guarda en `localStorage`.
 
 ---
@@ -86,6 +88,16 @@ Después abre `http://localhost:8000` en el navegador.
 | `↓`       | Soft drop (bajar más rápido)      |
 | `Espacio` | Hard drop (caída instantánea)     |
 | `P`       | Pausar / reanudar                 |
+
+---
+
+## Records
+
+- Al cargar la página aparece una pantalla de inicio con el top 5, el mejor combo y las líneas máximas. El juego no empieza hasta pulsar **Jugar**.
+- Al terminar la partida, si la puntuación (mayor que 0) entra en el top 5, aparece un campo de nombre (máx. 12 caracteres) y el botón **Guardar**; la nueva entrada se resalta en la tabla.
+- **Combo**: número de piezas consecutivas que, al fijarse, eliminan al menos una línea; se reinicia cuando una pieza se fija sin eliminar líneas.
+- **Borrar records** elimina las puntuaciones, el mejor combo y las líneas máximas.
+- Datos en `localStorage['tetris-records']`: `{ scores: [{name, score, lines, level}], bestCombo, maxLines }`. Si los datos están corruptos se ignoran.
 
 ---
 

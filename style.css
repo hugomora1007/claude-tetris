@@ -15,6 +15,7 @@
   --overlay-bg: rgba(10, 10, 20, 0.75);
   --danger: #e57373;
   --shadow: rgba(0, 0, 0, 0.6);
+  --highlight-bg: rgba(122, 162, 247, 0.25);
   color-scheme: dark;
 }
 
@@ -35,6 +36,7 @@
   --overlay-bg: rgba(243, 244, 248, 0.8);
   --danger: #d32f2f;
   --shadow: rgba(0, 0, 0, 0.15);
+  --highlight-bg: rgba(59, 91, 219, 0.18);
   color-scheme: light;
 }
 
@@ -250,4 +252,106 @@ kbd {
 
 #restart-btn:hover {
   background: var(--accent-hover);
+}
+
+/* ---- Records ---- */
+/* La sección de records del overlay solo se ve en game over (no en pausa) */
+.overlay-records { display: none; }
+#overlay.game-over .overlay-records { display: flex; flex-direction: column; gap: 10px; align-items: center; }
+#overlay.game-over .overlay-records.link-btn { display: inline-block; }
+
+.hidden { display: none !important; }
+
+.start-title {
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: 4px;
+  color: var(--accent);
+}
+
+.records-table {
+  border-collapse: collapse;
+  font-family: 'Courier New', Courier, monospace;
+  font-size: 13px;
+  min-width: 260px;
+}
+
+.records-table th {
+  font-size: 10px;
+  letter-spacing: 1px;
+  color: var(--label);
+  text-align: left;
+  padding: 2px 8px;
+}
+
+.records-table td {
+  padding: 3px 8px;
+  color: var(--text);
+}
+
+.records-table td:nth-child(3),
+.records-table th:nth-child(3) { text-align: right; }
+
+.records-table tr.highlight td {
+  background: var(--highlight-bg);
+  color: var(--accent);
+  font-weight: 700;
+}
+
+.records-empty,
+.records-stats {
+  font-size: 12px;
+  color: var(--muted);
+}
+
+.new-record {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--accent);
+}
+
+.name-form {
+  display: flex;
+  gap: 8px;
+}
+
+#name-input {
+  width: 140px;
+  padding: 6px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--canvas-bg);
+  color: var(--text);
+  font-size: 14px;
+  user-select: text;
+}
+
+#save-btn,
+.primary-btn {
+  background: var(--accent);
+  color: var(--on-accent);
+  border: none;
+  border-radius: 6px;
+  padding: 8px 18px;
+  font-size: 14px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+#save-btn:hover,
+.primary-btn:hover {
+  background: var(--accent-hover);
+}
+
+.link-btn {
+  background: none;
+  border: none;
+  color: var(--muted);
+  font-size: 12px;
+  text-decoration: underline;
+  cursor: pointer;
+}
+
+.link-btn:hover {
+  color: var(--danger);
 }
