@@ -207,6 +207,9 @@ function draw() {
     for (let c = 0; c < COLS; c++)
       drawBlock(ctx, c, r, board[r][c], BLOCK);
 
+  // After game over, `current` is the piece that could not spawn and overlaps the stack
+  if (gameOver) return;
+
   // ghost
   const gy = ghostY();
   for (let r = 0; r < current.shape.length; r++)
@@ -266,6 +269,7 @@ function loop(ts) {
     }
   }
   draw();
+  if (gameOver) return; // endGame() ran inside lockPiece(); don't re-arm the loop
   animId = requestAnimationFrame(loop);
 }
 

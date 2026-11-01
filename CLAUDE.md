@@ -28,7 +28,7 @@ Control flow:
 
 ## Gotchas
 
-- `endGame()` calls `cancelAnimationFrame`, but when the game ends from inside `loop()` (the lock happens in the loop's gravity step), `loop()` still runs `draw()` and re-requests a frame afterwards. Do not assume the loop has stopped after game over; guard new per-frame logic with `gameOver`.
+- `endGame()` calls `cancelAnimationFrame`, but when the game ends from inside `loop()` (the lock happens in the loop's gravity step), `animId` is the frame currently running, so the cancel does nothing. `loop()` therefore checks `gameOver` right after `draw()` and returns without re-requesting a frame. Keep that check if you edit `loop()`; otherwise pieces keep stacking after game over.
 - `clearLines()` scans bottom-up and does `r++` after removing a row, which cancels the loop's `r--` so the same index is re-checked (stacked full rows clear correctly). Keep that when editing it.
 - Scoring uses the level at the time of clearing, and `level` is recomputed from `lines` (`floor(lines / 10) + 1`) before `dropInterval` is updated.
 - Pause is handled before the game-state guard in `keydown` (`KeyP` always works); all other keys are ignored while paused or after game over.
