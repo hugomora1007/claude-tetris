@@ -42,6 +42,7 @@ Es una versión jugable del Tetris clásico con todas las mecánicas que esperar
 - **Sistema de puntuación** clásico de Tetris (100 / 300 / 500 / 800 multiplicado por nivel).
 - **Niveles** que aumentan cada 10 líneas y aceleran la caída.
 - **Pausa** y **Game Over** con opción de reinicio.
+- **Modo claro / oscuro**: un switch junto al título alterna el tema. Al primer uso se respeta `prefers-color-scheme` del sistema y la elección se guarda en `localStorage`.
 
 ---
 
@@ -176,6 +177,8 @@ Algunos parámetros fáciles de tunear en `game.js`:
 | `COLORS`       | Paleta de colores por tipo de pieza      | 7 colores             |
 | `LINE_SCORES`  | Puntos por 1, 2, 3 o 4 líneas eliminadas | `[0,100,300,500,800]` |
 | `dropInterval` | Velocidad inicial de caída en ms         | `1000`                |
+
+Los colores de los temas son variables CSS en `style.css`: `:root` (oscuro) y `:root[data-theme="light"]` (claro). El color de la rejilla del canvas se lee de `--grid`. La paleta de piezas es la misma en ambos temas (ninguna es blanca o casi blanca).
 
 > Si cambias `COLS`, `ROWS` o `BLOCK`, recuerda ajustar también `width` y `height` del `<canvas id="board">` en `index.html` para que coincida (`COLS × BLOCK` × `ROWS × BLOCK`).
 
